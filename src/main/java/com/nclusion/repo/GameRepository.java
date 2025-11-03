@@ -13,8 +13,8 @@ import com.nclusion.model.Player;
 
 @Repository
 public class GameRepository {
-	
-	private final Map<String, Game> games = new ConcurrentHashMap<>();
+
+    private final Map<String, Game> games = new ConcurrentHashMap<>();
     private final Map<String, Player> stats = new ConcurrentHashMap<>();
     private final Set<String> players = Collections.synchronizedSet(new HashSet<>());
 
@@ -42,7 +42,12 @@ public class GameRepository {
     }
 
     public boolean registerPlayer(String playerId) {
-        return players.add(playerId);
+        if (!playerExists(playerId)) {
+            Player player = new Player(playerId);
+            players.add(player.getName());
+            return true;
+        }
+        return false;
     }
 
     public boolean playerExists(String playerId) {
@@ -52,9 +57,9 @@ public class GameRepository {
     public Collection<Game> findAllGames() {
         return games.values();
     }
-    
+
     public Set<String> findAllPlayers() {
-    	return players;
+        return players;
     }
 
 }

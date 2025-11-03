@@ -7,32 +7,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class Player {
 	private String id;
+	private String name;
 	private Integer gamesWon;
 	private Integer gamesLost;
 	private Integer gamesDraw;
 	private Integer totalMovesInWins;
 
 	public Player() {
+	}
+
+	public Player(String name) {
+		super();
 		this.id = UUID.randomUUID().toString();
+		this.name = name;
 		this.gamesWon = 0;
 		this.gamesLost = 0;
 		this.gamesDraw = 0;
 		this.totalMovesInWins = 0;
 	}
 
-	public Player(String id) {
+	public Player(String name, Integer gamesWon, Integer gamesLost, Integer gamesDraw) {
 		super();
 		this.id = UUID.randomUUID().toString();
-		this.gamesWon = 0;
-		this.gamesLost = 0;
-		this.gamesDraw = 0;
-		this.totalMovesInWins = 0;
-	}
-
-	public Player(String id, Integer gamesWon, Integer gamesLost, Integer gamesDraw) {
-		super();
-		this.id = UUID.randomUUID().toString();
-		;
+		this.name = name;
 		this.gamesWon = gamesWon;
 		this.gamesLost = gamesLost;
 		this.gamesDraw = gamesDraw;
@@ -43,8 +40,12 @@ public class Player {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Integer getGamesWon() {
