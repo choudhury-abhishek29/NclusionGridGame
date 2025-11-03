@@ -13,16 +13,16 @@ public class Player {
 	private Integer totalMovesInWins;
 
 	public Player() {
-		this.id = UUID.randomUUID().toString();;
+		this.id = UUID.randomUUID().toString();
 		this.gamesWon = 0;
 		this.gamesLost = 0;
 		this.gamesDraw = 0;
 		this.totalMovesInWins = 0;
 	}
-	
+
 	public Player(String id) {
 		super();
-		this.id = UUID.randomUUID().toString();;
+		this.id = UUID.randomUUID().toString();
 		this.gamesWon = 0;
 		this.gamesLost = 0;
 		this.gamesDraw = 0;
@@ -31,7 +31,8 @@ public class Player {
 
 	public Player(String id, Integer gamesWon, Integer gamesLost, Integer gamesDraw) {
 		super();
-		this.id = UUID.randomUUID().toString();;
+		this.id = UUID.randomUUID().toString();
+		;
 		this.gamesWon = gamesWon;
 		this.gamesLost = gamesLost;
 		this.gamesDraw = gamesDraw;
@@ -77,23 +78,24 @@ public class Player {
 	public void setTotalMovesInWins(Integer totalMovesInWins) {
 		this.totalMovesInWins = totalMovesInWins;
 	}
-	
+
 	public double getEfficiency() {
-		if(gamesWon == 0) return Double.MAX_VALUE;
-		return (double)totalMovesInWins/gamesWon;
+		if (gamesWon == 0)
+			return Double.MAX_VALUE;
+		return (double) totalMovesInWins / gamesWon;
 	}
-	
+
 	public void incWins(int movesInThisWin) {
-        this.gamesWon++;
-        this.totalMovesInWins += movesInThisWin;
-    }
-	
+		this.gamesWon++;
+		this.totalMovesInWins += movesInThisWin;
+	}
+
 	public void incLosses() {
-        this.gamesLost++;
-    }
-	
+		this.gamesLost++;
+	}
+
 	public void incDraws() {
-        this.gamesDraw++;
-    }
+		this.gamesDraw++;
+	}
 
 }

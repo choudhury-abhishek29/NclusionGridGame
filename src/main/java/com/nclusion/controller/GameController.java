@@ -1,7 +1,5 @@
 package com.nclusion.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nclusion.model.Game;
-import com.nclusion.model.Player;
 import com.nclusion.repo.GameRepository;
 import com.nclusion.service.GameService;
 import com.nclusion.service.LeaderboardService;
@@ -20,8 +16,8 @@ import com.nclusion.service.LeaderboardService;
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
-	
-	private final GameService gameService;
+
+    private final GameService gameService;
     private final GameRepository repo;
     private final LeaderboardService leaderboardService;
 
@@ -33,16 +29,24 @@ public class GameController {
 
     // --- Games ---
     @PostMapping("/new")
-    public Game createGame() {
-        return gameService.createGame();
+    public ResponseEntity<?> createGame() {
+        try {
+            return ResponseEntity.ok(gameService.createGame());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{gameId}/join")
-    public Game joinGame(@PathVariable String gameId, @RequestParam String playerId) {
+    public ResponseEntity<?> joinGame(@PathVariable String gameId, @RequestParam String playerId) {
         if (!repo.playerExists(playerId)) {
-            throw new IllegalArgumentException("Player not registered");
+            return ResponseEntity.badRequest().body("Player not registered");
         }
-        return gameService.joinGame(gameId, playerId);
+        try {
+            return ResponseEntity.ok(gameService.joinGame(gameId, playerId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     public static class MoveRequest {
@@ -52,26 +56,38 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/moves")
-    public Game makeMove(@PathVariable String gameId, @RequestBody MoveRequest req) {
-        return gameService.makeMove(gameId, req.playerId, req.row, req.col);
+    public ResponseEntity<?> makeMove(@PathVariable String gameId, @RequestBody MoveRequest req) {
+        try {
+            return ResponseEntity.ok(gameService.makeMove(gameId, req.playerId, req.row, req.col));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{gameId}")
-    public Game getGame(@PathVariable String gameId) {
-        return gameService.getGame(gameId);
+    public ResponseEntity<?> getGame(@PathVariable String gameId) {
+        try {
+            return ResponseEntity.ok(gameService.getGame(gameId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/leaderboard")
-    public List<Player> leaderboard(@RequestParam(defaultValue = "winCount") String by) {
-        if ("efficiency".equalsIgnoreCase(by)) {
-            return leaderboardService.top3ByEfficiency();
+    public ResponseEntity<?> leaderboard(@RequestParam(defaultValue = "winCount") String by) {
+        try {
+            if ("efficiency".equalsIgnoreCase(by)) {
+                return ResponseEntity.ok(leaderboardService.top3ByEfficiency());
+            }
+            return ResponseEntity.ok(leaderboardService.top3ByWinCount());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return leaderboardService.top3ByWinCount();
     }
-    
-    @GetMapping(path="/on")
-    public String healthCheck() {
-    	return "Game is on...!!!";
+
+    @GetMapping(path = "/on")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Game is on...!!!");
     }
 
 }
