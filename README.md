@@ -30,7 +30,12 @@ All responses return either a success payload with HTTP 200 or a 400 with a plai
   - Register a player ID
   - Query params:
     - `playerId` (required)
-    - `mode` (optional, default: `join`)
+    - `mode` (optional, default: `join`) - `join` or `host`
+  - Response for `mode=join` (default):
+    - Returns `playerId` and array of `gameIds` with status `WAITING_FOR_PLAYERS`
+  - Response for `mode=host`:
+    - Creates a new game and adds the player as the first player
+    - Returns `playerId` and the created `gameId`
   - Example requests:
 
     ```
@@ -38,6 +43,9 @@ All responses return either a success payload with HTTP 200 or a 400 with a plai
     Host: localhost:8080
 
     POST /api/player/register?playerId=bob&mode=join HTTP/1.1
+    Host: localhost:8080
+
+    POST /api/player/register?playerId=charlie&mode=host HTTP/1.1
     Host: localhost:8080
     ```
 
@@ -101,6 +109,35 @@ All responses return either a success payload with HTTP 200 or a 400 with a plai
     Host: localhost:8080
     ```
 
+- **GET** `/api/game/allGames`
+  - Get games by state or all games with their states
+  - Query params:
+    - `state` (optional) - One of: `WAITING_FOR_PLAYERS`, `IN_PROGRESS`, `FINISHED`
+  - If `state` is provided: Returns list of game IDs matching that state
+  - If `state` is not provided: Returns map of `gameId -> state` for all games
+  - Example requests:
+    ```
+    GET /api/game/allGames HTTP/1.1
+    Host: localhost:8080
+
+    GET /api/game/allGames?state=WAITING_FOR_PLAYERS HTTP/1.1
+    Host: localhost:8080
+
+    GET /api/game/allGames?state=IN_PROGRESS HTTP/1.1
+    Host: localhost:8080
+    ```
+
+- **POST** `/api/game/endGame`
+  - End a game by setting its state to FINISHED
+  - Query params:
+    - `gameId` (required)
+  - Returns the updated game object
+  - Example request:
+    ```
+    POST /api/game/endGame?gameId=<gameId> HTTP/1.1
+    Host: localhost:8080
+    ```
+
 ### Leaderboard
 
 - **GET** `/api/game/leaderboard`
@@ -125,14 +162,20 @@ All responses return either a success payload with HTTP 200 or a 400 with a plai
 POST /api/player/register?playerId=alice HTTP/1.1
 Host: localhost:8080
 
-POST /api/player/register?playerId=bob HTTP/1.1
+→ Response: {"playerId": "alice", "gameIds": [...]} (list of available games)
+
+POST /api/player/register?playerId=bob&mode=host HTTP/1.1
 Host: localhost:8080
 
-2) Create a game
+→ Response: {"playerId": "bob", "gameId": "<new-game-id>"} (creates new game)
+
+2) Option A: Create a game manually
 POST /api/game/new HTTP/1.1
 Host: localhost:8080
 
 → Note: capture the returned `id` field from the response as <gameId>
+
+Option B: Use host mode during registration (see step 1)
 
 3) Join the game
 POST /api/game/<gameId>/join?playerId=alice HTTP/1.1
@@ -166,7 +209,24 @@ Content-Type: application/json
 GET /api/game/<gameId> HTTP/1.1
 Host: localhost:8080
 
-6) Leaderboard
+6) Check available games (optional)
+GET /api/game/allGames HTTP/1.1
+Host: localhost:8080
+
+→ Returns map of all gameIds and their states
+
+GET /api/game/allGames?state=WAITING_FOR_PLAYERS HTTP/1.1
+Host: localhost:8080
+
+→ Returns list of game IDs with WAITING_FOR_PLAYERS state
+
+7) End a game (optional)
+POST /api/game/endGame?gameId=<gameId> HTTP/1.1
+Host: localhost:8080
+
+→ Sets game state to FINISHED
+
+8) Leaderboard
 GET /api/game/leaderboard HTTP/1.1
 Host: localhost:8080
 ```
