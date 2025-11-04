@@ -126,6 +126,21 @@ public class GameController {
         }
     }
 
+    @PostMapping("/endGame")
+    public ResponseEntity<?> endGame(@RequestParam String gameId) {
+        try {
+            Game game = repo.findGame(gameId)
+                    .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+            game.setState(GAME_STATE.FINISHED);
+            repo.saveGame(game);
+            return ResponseEntity.ok(game);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping(path = "/on")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Game is on...!!!");
