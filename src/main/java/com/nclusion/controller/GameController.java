@@ -1,5 +1,10 @@
 package com.nclusion.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nclusion.model.GAME_STATE;
+import com.nclusion.model.Game;
 import com.nclusion.repo.GameRepository;
 import com.nclusion.service.GameService;
 import com.nclusion.service.LeaderboardService;
@@ -80,6 +87,40 @@ public class GameController {
                 return ResponseEntity.ok(leaderboardService.top3ByEfficiency());
             }
             return ResponseEntity.ok(leaderboardService.top3ByWinCount());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/allGames")
+    public ResponseEntity<?> getGamesByState(@RequestParam(required = false) String state) {
+        try {
+            if (state == null || state.isEmpty()) {
+                // Return map of gameId -> state for all games
+                Map<String, String> gamesMap = repo.findAllGames().stream()
+                        .collect(Collectors.toMap(
+                                Game::getId,
+                                game -> game.getState().name(),
+                                (existing, replacement) -> existing,
+                                HashMap::new));
+                return ResponseEntity.ok(gamesMap);
+            }
+
+            // Filter by state if provided
+            GAME_STATE gameState;
+            try {
+                gameState = GAME_STATE.valueOf(state.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                        .body("Invalid game state. Valid values are: WAITING_FOR_PLAYERS, IN_PROGRESS, FINISHED");
+            }
+
+            List<String> gameIds = repo.findAllGames().stream()
+                    .filter(game -> game.getState() == gameState)
+                    .map(Game::getId)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(gameIds);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
